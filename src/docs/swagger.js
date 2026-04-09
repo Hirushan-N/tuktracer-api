@@ -23,9 +23,20 @@ const options = {
       {
         name: 'Locations',
         description: 'Province, district, and police station endpoints'
+      },
+      {
+        name: 'Authentication',
+        description: 'Authentication and user identity endpoints'
       }
     ],
     components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      },
       schemas: {
         Province: {
           type: 'object',
