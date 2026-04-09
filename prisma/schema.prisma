@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  HQ_ADMIN
+  PROVINCIAL_ADMIN
+  DISTRICT_OFFICER
+  STATION_OFFICER
+  DEVICE
+}
+
+enum TukTukStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  name       String
+  email      String    @unique
+  password   String
+  role       UserRole
+  provinceId Int?
+  districtId Int?
+  stationId  Int?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  province   Province?      @relation(fields: [provinceId], references: [id])
+  district   District?      @relation(fields: [districtId], references: [id])
+  station    PoliceStation? @relation(fields: [stationId], references: [id])
+
+  @@map("users")
+}
+
+model Province {
+  id         Int       @id @default(autoincrement())
+  name       String    @unique
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  districts  District[]
+  users      User[]
+  tukTuks    TukTuk[]
+
+  @@map("provinces")
+}
+
+model District {
+  id          Int       @id @default(autoincrement())
+  name        String
+  provinceId  Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  province    Province       @relation(fields: [provinceId], references: [id], onDelete: Cascade)
+  stations    PoliceStation[]
+  users       User[]
+  tukTuks     TukTuk[]
+
+  @@unique([name, provinceId])
+  @@map("districts")
+}
+
+model PoliceStation {
+  id         Int       @id @default(autoincrement())
+  name       String
+  districtId Int
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  district   District  @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  users      User[]
+  tukTuks    TukTuk[]
+
+  @@unique([name, districtId])
+  @@map("police_stations")
+}
+
+model Driver {
+  id         Int       @id @default(autoincrement())
+  fullName   String
+  nic        String    @unique
+  phone      String
+  licenseNo  String    @unique
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  tukTuks    TukTuk[]
+
+  @@map("drivers")
+}
+
+model Device {
+  id         Int       @id @default(autoincrement())
+  deviceCode String    @unique
+  apiKey     String    @unique
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  tukTuks    TukTuk[]
+
+  @@map("devices")
+}
+
+model TukTuk {
+  id             Int           @id @default(autoincrement())
+  registrationNo String        @unique
+  model          String?
+  color          String?
+  status         TukTukStatus  @default(ACTIVE)
+  driverId       Int?
+  deviceId       Int?
+  provinceId     Int
+  districtId     Int
+  stationId      Int
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  driver         Driver?        @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  device         Device?        @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  province       Province       @relation(fields: [provinceId], references: [id], onDelete: Restrict)
+  district       District       @relation(fields: [districtId], references: [id], onDelete: Restrict)
+  station        PoliceStation  @relation(fields: [stationId], references: [id], onDelete: Restrict)
+  locationLogs   LocationLog[]
+
+  @@map("tuk_tuks")
+}
+
+model LocationLog {
+  id         Int       @id @default(autoincrement())
+  tukTukId   Int
+  latitude   Decimal   @db.Decimal(10, 7)
+  longitude  Decimal   @db.Decimal(10, 7)
+  speed      Decimal?  @db.Decimal(5, 2)
+  recordedAt DateTime
+  createdAt  DateTime  @default(now())
+
+  tukTuk     TukTuk    @relation(fields: [tukTukId], references: [id], onDelete: Cascade)
+
+  @@index([tukTukId, recordedAt])
+  @@map("location_logs")
+}
