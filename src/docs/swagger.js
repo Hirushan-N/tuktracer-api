@@ -31,6 +31,18 @@ const options = {
       {
         name: 'TukTuks',
         description: 'Tuk-tuk management endpoints'
+      },
+      {
+        name: 'Drivers',
+        description: 'Driver management endpoints'
+      },
+      {
+        name: 'Devices',
+        description: 'Tracking device management endpoints'
+      },
+      {
+        name: 'Tracking',
+        description: 'Location ping, live location, and movement history endpoints'
       }
     ],
     components: {
