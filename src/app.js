@@ -10,6 +10,7 @@ const tukTukRoutes = require('./routes/tukTukRoutes');
 const driverRoutes = require('./routes/driverRoutes');
 const deviceRoutes = require('./routes/deviceRoutes');
 const trackingRoutes = require('./routes/trackingRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 const swaggerSpec = require('./docs/swagger');
 
@@ -56,6 +57,7 @@ app.use('/api', tukTukRoutes);
 app.use('/api', driverRoutes);
 app.use('/api', deviceRoutes);
 app.use('/api', trackingRoutes);
+app.use('/api', reportRoutes);
 
 app.use((req, res) => {
   return res.status(404).json({
