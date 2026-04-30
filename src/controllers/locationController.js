@@ -1,145 +1,97 @@
-const prisma = require('../config/prisma');
+const {
+  getProvinceRecords,
+  getDistrictRecords,
+  getStationRecords,
+  getDistrictRecordsByProvince,
+  getStationRecordsByDistrict
+} = require('../services/locationService');
 
 const getAllProvinces = async (req, res) => {
   try {
-    const provinces = await prisma.province.findMany({
-      orderBy: {
-        name: 'asc'
-      }
-    });
+    const provinces = await getProvinceRecords();
 
     return res.status(200).json({
       success: true,
       message: 'Provinces retrieved successfully',
+      count: provinces.length,
       data: provinces
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: 'Failed to retrieve provinces',
-      error: error.message
+      message: error.message || 'Failed to retrieve provinces'
     });
   }
 };
 
 const getAllDistricts = async (req, res) => {
   try {
-    const districts = await prisma.district.findMany({
-      include: {
-        province: true
-      },
-      orderBy: {
-        name: 'asc'
-      }
-    });
+    const districts = await getDistrictRecords();
 
     return res.status(200).json({
       success: true,
       message: 'Districts retrieved successfully',
+      count: districts.length,
       data: districts
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: 'Failed to retrieve districts',
-      error: error.message
+      message: error.message || 'Failed to retrieve districts'
     });
   }
 };
 
 const getAllStations = async (req, res) => {
   try {
-    const stations = await prisma.policeStation.findMany({
-      include: {
-        district: {
-          include: {
-            province: true
-          }
-        }
-      },
-      orderBy: {
-        name: 'asc'
-      }
-    });
+    const stations = await getStationRecords();
 
     return res.status(200).json({
       success: true,
       message: 'Police stations retrieved successfully',
+      count: stations.length,
       data: stations
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: 'Failed to retrieve police stations',
-      error: error.message
+      message: error.message || 'Failed to retrieve police stations'
     });
   }
 };
 
 const getDistrictsByProvince = async (req, res) => {
   try {
-    const provinceId = Number(req.params.provinceId);
-
-    if (Number.isNaN(provinceId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid province id'
-      });
-    }
-
-    const districts = await prisma.district.findMany({
-      where: {
-        provinceId
-      },
-      orderBy: {
-        name: 'asc'
-      }
-    });
+    const districts = await getDistrictRecordsByProvince(req.params.provinceId);
 
     return res.status(200).json({
       success: true,
       message: 'Districts by province retrieved successfully',
+      count: districts.length,
       data: districts
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: 'Failed to retrieve districts by province',
-      error: error.message
+      message: error.message || 'Failed to retrieve districts by province'
     });
   }
 };
 
 const getStationsByDistrict = async (req, res) => {
   try {
-    const districtId = Number(req.params.districtId);
-
-    if (Number.isNaN(districtId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid district id'
-      });
-    }
-
-    const stations = await prisma.policeStation.findMany({
-      where: {
-        districtId
-      },
-      orderBy: {
-        name: 'asc'
-      }
-    });
+    const stations = await getStationRecordsByDistrict(req.params.districtId);
 
     return res.status(200).json({
       success: true,
       message: 'Police stations by district retrieved successfully',
+      count: stations.length,
       data: stations
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: 'Failed to retrieve police stations by district',
-      error: error.message
+      message: error.message || 'Failed to retrieve police stations by district'
     });
   }
 };
