@@ -1,39 +1,13 @@
-const prisma = require('../config/prisma');
+const {
+  createDriverRecord,
+  getDriverRecords,
+  getDriverRecordById,
+  updateDriverRecord
+} = require('../services/driverService');
 
 const createDriver = async (req, res) => {
   try {
-    const { fullName, nic, phone, licenseNo } = req.body;
-
-    if (!fullName || !nic || !phone || !licenseNo) {
-      return res.status(400).json({
-        success: false,
-        message: 'fullName, nic, phone, and licenseNo are required'
-      });
-    }
-
-    const existingNic = await prisma.driver.findUnique({ where: { nic } });
-
-    if (existingNic) {
-      return res.status(409).json({
-        success: false,
-        message: 'Driver with this NIC already exists'
-      });
-    }
-
-    const existingLicense = await prisma.driver.findUnique({
-      where: { licenseNo }
-    });
-
-    if (existingLicense) {
-      return res.status(409).json({
-        success: false,
-        message: 'Driver with this license already exists'
-      });
-    }
-
-    const driver = await prisma.driver.create({
-      data: { fullName, nic, phone, licenseNo }
-    });
+    const driver = await createDriverRecord(req.body);
 
     return res.status(201).json({
       success: true,
@@ -41,99 +15,61 @@ const createDriver = async (req, res) => {
       data: driver
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: 'Failed to create driver',
-      error: error.message
+      message: error.message || 'Failed to create driver'
     });
   }
 };
 
 const getAllDrivers = async (req, res) => {
   try {
-    const drivers = await prisma.driver.findMany({
-      include: {
-        tukTuks: {
-          select: {
-            id: true,
-            registrationNo: true
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+    const drivers = await getDriverRecords();
 
     return res.status(200).json({
       success: true,
       message: 'Drivers retrieved successfully',
+      count: drivers.length,
       data: drivers
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: 'Failed to retrieve drivers',
-      error: error.message
+      message: error.message || 'Failed to retrieve drivers'
     });
   }
 };
 
 const getDriverById = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    const driver = await prisma.driver.findUnique({
-      where: { id },
-      include: {
-        tukTuks: true
-      }
-    });
-
-    if (!driver) {
-      return res.status(404).json({
-        success: false,
-        message: 'Driver not found'
-      });
-    }
+    const driver = await getDriverRecordById(req.params.id);
 
     return res.status(200).json({
       success: true,
+      message: 'Driver retrieved successfully',
       data: driver
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: error.message
+      message: error.message || 'Failed to retrieve driver'
     });
   }
 };
 
 const updateDriver = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    const driver = await prisma.driver.findUnique({ where: { id } });
-
-    if (!driver) {
-      return res.status(404).json({
-        success: false,
-        message: 'Driver not found'
-      });
-    }
-
-    const updated = await prisma.driver.update({
-      where: { id },
-      data: req.body
-    });
+    const updatedDriver = await updateDriverRecord(req.params.id, req.body);
 
     return res.status(200).json({
       success: true,
-      message: 'Driver updated',
-      data: updated
+      message: 'Driver updated successfully',
+      data: updatedDriver
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: error.message
+      message: error.message || 'Failed to update driver'
     });
   }
 };

@@ -1,71 +1,20 @@
-const bcrypt = require('bcrypt');
-const prisma = require('../config/prisma');
-const { generateToken } = require('../utils/jwt');
+const { loginUser } = require('../services/authService');
 
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email and password are required'
-      });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: {
-        province: true,
-        district: true,
-        station: true
-      }
-    });
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    const token = generateToken({
-      id: user.id,
-      email: user.email,
-      role: user.role
-    });
+    const result = await loginUser(email, password);
 
     return res.status(200).json({
       success: true,
       message: 'Login successful',
-      data: {
-        token,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          province: user.province,
-          district: user.district,
-          station: user.station,
-          createdAt: user.createdAt
-        }
-      }
+      data: result
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: 'Login failed',
-      error: error.message
+      message: error.message || 'Login failed'
     });
   }
 };

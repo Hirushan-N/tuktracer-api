@@ -1,105 +1,75 @@
-const prisma = require('../config/prisma');
-const crypto = require('crypto');
+const {
+  createDeviceRecord,
+  getDeviceRecords,
+  getDeviceRecordById,
+  updateDeviceRecord
+} = require('../services/deviceService');
 
 const createDevice = async (req, res) => {
   try {
-    const { deviceCode } = req.body;
-
-    if (!deviceCode) {
-      return res.status(400).json({
-        success: false,
-        message: 'deviceCode is required'
-      });
-    }
-
-    const apiKey = crypto.randomBytes(24).toString('hex');
-
-    const device = await prisma.device.create({
-      data: {
-        deviceCode,
-        apiKey
-      }
-    });
+    const device = await createDeviceRecord(req.body);
 
     return res.status(201).json({
       success: true,
-      message: 'Device created',
+      message: 'Device created successfully',
       data: device
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: error.message
+      message: error.message || 'Failed to create device'
     });
   }
 };
 
 const getAllDevices = async (req, res) => {
   try {
-    const devices = await prisma.device.findMany({
-      include: {
-        tukTuks: true
-      }
-    });
+    const devices = await getDeviceRecords(req.query);
 
     return res.status(200).json({
       success: true,
+      message: 'Devices retrieved successfully',
+      count: devices.length,
       data: devices
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: error.message
+      message: error.message || 'Failed to retrieve devices'
     });
   }
 };
 
 const getDeviceById = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    const device = await prisma.device.findUnique({
-      where: { id },
-      include: { tukTuks: true }
-    });
-
-    if (!device) {
-      return res.status(404).json({
-        success: false,
-        message: 'Device not found'
-      });
-    }
+    const device = await getDeviceRecordById(req.params.id);
 
     return res.status(200).json({
       success: true,
+      message: 'Device retrieved successfully',
       data: device
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: error.message
+      message: error.message || 'Failed to retrieve device'
     });
   }
 };
 
 const updateDevice = async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
-    const updated = await prisma.device.update({
-      where: { id },
-      data: req.body
-    });
+    const updatedDevice = await updateDeviceRecord(req.params.id, req.body);
 
     return res.status(200).json({
       success: true,
-      message: 'Device updated',
-      data: updated
+      message: 'Device updated successfully',
+      data: updatedDevice
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: error.message
+      message: error.message || 'Failed to update device'
     });
   }
 };
