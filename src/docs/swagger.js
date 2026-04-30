@@ -43,6 +43,10 @@ const options = {
       {
         name: 'Tracking',
         description: 'Location ping, live location, and movement history endpoints'
+      },
+      {
+        name: 'Reports',
+        description: 'Operational summary and inactive vehicle report endpoints'
       }
     ],
     components: {
