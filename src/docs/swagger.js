@@ -27,6 +27,10 @@ const options = {
       {
         name: 'Authentication',
         description: 'Authentication and user identity endpoints'
+      },
+      {
+        name: 'TukTuks',
+        description: 'Tuk-tuk management endpoints'
       }
     ],
     components: {
@@ -38,77 +42,6 @@ const options = {
         }
       },
       schemas: {
-        Province: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'integer',
-              example: 1
-            },
-            name: {
-              type: 'string',
-              example: 'Western'
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time'
-            }
-          }
-        },
-        District: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'integer',
-              example: 1
-            },
-            name: {
-              type: 'string',
-              example: 'Colombo'
-            },
-            provinceId: {
-              type: 'integer',
-              example: 1
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time'
-            }
-          }
-        },
-        PoliceStation: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'integer',
-              example: 1
-            },
-            name: {
-              type: 'string',
-              example: 'Colombo Fort Police Station'
-            },
-            districtId: {
-              type: 'integer',
-              example: 1
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time'
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time'
-            }
-          }
-        },
         ErrorResponse: {
           type: 'object',
           properties: {
