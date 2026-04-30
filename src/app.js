@@ -6,6 +6,7 @@ const swaggerUi = require('swagger-ui-express');
 
 const locationRoutes = require('./routes/locationRoutes');
 const authRoutes = require('./routes/authRoutes');
+const tukTukRoutes = require('./routes/tukTukRoutes');
 const swaggerSpec = require('./docs/swagger');
 
 const app = express();
@@ -16,7 +17,6 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 🔥 Swagger MUST be before routes
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/', (req, res) => {
@@ -46,11 +46,10 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
-// API routes
 app.use('/api', locationRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api', tukTukRoutes);
 
-// 404 handler
 app.use((req, res) => {
   return res.status(404).json({
     success: false,
