@@ -1,5 +1,10 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 
+const serverUrl =
+  process.env.NODE_ENV === 'production'
+    ? 'https://tuktracer-api.onrender.com'
+    : 'http://localhost:5000';
+
 const options = {
   definition: {
     openapi: '3.0.0',
@@ -11,8 +16,11 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000',
-        description: 'Local Development Server'
+        url: serverUrl,
+        description:
+          process.env.NODE_ENV === 'production'
+            ? 'Production Server'
+            : 'Local Development Server'
       }
     ],
     tags: [
